@@ -1,0 +1,150 @@
+SQLs para criar o banco de dados:
+
+create database faculdade
+default character set utf8
+default collate UTF8_GENERAL_CI;
+
+create table professor (
+    registro int AUTO_INCREMENT,
+    nome varchar(80) NOT NULL,
+    cpf varchar(14) NOT NULL UNIQUE,
+    titulo varchar(20) NOT NULL,
+    rua varchar(80) NOT NULL,
+    numero int NOT NULL,
+    cep varchar(9) NOT NULL,
+    bairro varchar(80) NOT NULL,
+    cidade varchar(80) NOT NULL,
+    uf varchar(2) NOT NULL,
+
+    constraint pk_professor primary key(registro)
+);
+
+create table curso (
+    codigo int AUTO_INCREMENT,
+    nome varchar(80) NOT NULL UNIQUE,
+    duracao_anos float(2,1) NOT NULL,
+    turno enum("Manhã", "Tarde", "Noite") NOT NULL,
+    mensalidade float(6,2) NOT NULL,
+    registro_coordenador int,
+
+    constraint pk_curso primary key(codigo),
+    constraint fk_coordenador_curso foreign key(registro_coordenador) references professor(registro) on delete cascade on update cascade
+);
+
+create table aluno (
+    matricula int AUTO_INCREMENT,
+    nome varchar(80) NOT NULL,
+    cpf varchar(14) NOT NULL UNIQUE,
+    data_nascimento date NOT NULL,
+    rua varchar(80) NOT NULL,
+    numero int NOT NULL,
+    cep varchar(9) NOT NULL,
+    bairro varchar(80) NOT NULL,
+    cidade varchar(80) NOT NULL,
+    uf varchar(2) NOT NULL,
+    data_matricula_curso date NOT NULL,
+    matricula_monitor int,
+    codigo_curso int,
+
+    constraint pk_aluno primary key(matricula),
+    constraint fk_monitor_aluno foreign key(matricula_monitor) references aluno(matricula) on delete cascade on update cascade,
+    constraint fk_curso_aluno foreign key(codigo_curso) references curso(codigo) on delete cascade on update cascade
+);
+
+create table disciplina (
+    codigo int AUTO_INCREMENT,
+    nome varchar(80) NOT NULL UNIQUE,
+    carga_horaria int NOT NULL,
+    modalidade enum("Presencial", "EAD") NOT NULL,
+    
+    constraint pk_disciplina primary key(codigo)
+);
+
+create table turma (
+    codigo int AUTO_INCREMENT,
+    dia_da_semana varchar(20) NOT NULL,
+
+    constraint pk_turma primary key(codigo)
+);
+
+create table sala (
+    id int AUTO_INCREMENT,
+    bloco char NOT NULL,
+    andar varchar(10) NOT NULL,
+
+    constraint pk_sala primary key(id)
+);
+
+create table telefone_aluno (
+    matricula_aluno int,
+    telefone varchar(20),
+
+    constraint pk_telefone_aluno primary key(matricula_aluno, telefone),
+    constraint fk_aluno_telefone_aluno foreign key(matricula_aluno) references aluno(matricula) on delete cascade on update cascade
+);
+
+create table disciplina_aluno (
+    codigo_disciplina int,
+    matricula_aluno int,
+    frequencia int NOT NULL,
+    nota float(3,1) NOT NULL,
+    situacao enum('Aprovado', 'Reprovado'),
+
+    constraint pk_disciplina_aluno primary key(codigo_disciplina, matricula_aluno),
+    constraint fk_disciplina_disciplina_aluno foreign key(codigo_disciplina) references disciplina(codigo) on delete cascade on update cascade,
+    constraint fk_aluno_disciplina_aluno foreign key(matricula_aluno) references aluno(matricula) on delete cascade on update cascade
+);
+
+create table disciplina_curso (
+    codigo_disciplina int,
+    codigo_curso int,
+
+    constraint pk_disciplina_curso primary key(codigo_disciplina, codigo_curso),
+    constraint fk_disciplina_disciplina_curso foreign key(codigo_disciplina) references disciplina(codigo) on delete cascade on update cascade,
+    constraint fk_curso_disciplina_curso foreign key(codigo_curso) references curso(codigo) on delete cascade on update cascade
+);
+
+create table disciplina_professor (
+    codigo_disciplina int,
+    registro_professor int,
+
+    constraint pk_disciplina_professor primary key(codigo_disciplina, registro_professor),
+    constraint fk_disciplina_disciplina_professor foreign key(codigo_disciplina) references disciplina(codigo) on delete cascade on update cascade,
+    constraint fk_professor_disciplina_professor foreign key(registro_professor) references professor(registro) on delete cascade on update cascade
+);
+
+create table telefone_professor (
+    registro_professor int,
+    telefone varchar(20),
+
+    constraint pk_telefone_professor primary key(registro_professor, telefone),
+    constraint fk_professor_telefone_professor foreign key(registro_professor) references professor(registro) on delete cascade on update cascade
+);
+
+create table curso_professor (
+    codigo_curso int,
+    registro_professor int,
+
+    constraint pk_curso_professor primary key(codigo_curso, registro_professor),
+    constraint fk_curso_curso_professor foreign key(codigo_curso) references curso(codigo) on delete cascade on update cascade,
+    constraint fk_professor_curso_professor foreign key(registro_professor) references professor(registro) on delete cascade on update cascade
+);
+
+create table turma_curso (
+    codigo_turma int,
+    codigo_curso int,
+
+    constraint pk_turma_curso primary key(codigo_turma, codigo_curso),
+    constraint fk_turma_turma_curso foreign key(codigo_turma) references turma(codigo) on delete cascade on update cascade,
+    constraint fk_curso_turma_curso foreign key(codigo_curso) references curso(codigo) on delete cascade on update cascade
+);
+
+create table sala_turma (
+    id_sala int,
+    codigo_turma int,
+    horario time NOT NULL,
+
+    constraint pk_sala_turma primary key(id_sala, codigo_turma),
+    constraint fk_sala_sala_turma foreign key(id_sala) references sala(id) on delete cascade on update cascade,
+    constraint fk_turma_sala_turma foreign key(codigo_turma) references turma(codigo) on delete cascade on update cascade
+);
